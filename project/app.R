@@ -16,6 +16,25 @@ library(tmap)
 library(sf)   
 library(raster)
 library(spData)
+library(ggmap)
+
+
+register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
+
+team_cities <- c("Madrid, Spain", "Barcelona, Spain", "Madrid, Spain", "Bilbao, Spain", "Valencia, Spain")
+
+cities_coord <- geocode(team_cities, source = "google")
+
+team <- c("Real Madrid", "FC Barcelona", "Atlético Madrid", "Athletic Bilbao", "Valencia")
+
+n_champions <- c(33, 25, 10, 8, 6)
+
+cities_coord$Teams <- team
+cities_coord$Champions <- n_champions
+cities_coord$City <- team_cities
+cities_coord
+is.data.frame(cities_coord)
+
 
 data <- read.csv("worldearthquakes.csv")
 #categorize earthquake depth
@@ -84,13 +103,16 @@ server <- function(input, output, session) {
   
   #create the map
   output$mymap <- renderLeaflet({
-    leaflet(data) %>% 
+    leaflet(data) %>%
       addProviderTiles(providers$CartoDB.Positron, group = "Default Maptile") %>% 
       addProviderTiles(providers$CartoDB.DarkMatter, group = "Dark Maptile") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>% 
+      #addMarkers(~long, ~lat, popup="The birthplace of R") %>%
+      #addCircles(lng =c(10,20,-10, 10.5, 10.6), lat = c(10, 10, 10, 10, 10), radius = 1000000, weight = 1, color = "#777777",popup="The birthplace of R") %>%
       addPolygons(data = world[world$name_long == input$country, ], fill = TRUE) %>%
       #plot(world["pop"])   %>%
+      addMarkers(data = cities_coord, popup=cities_coord$Teams, clusterOptions = markerClusterOptions())%>% 
       addLayersControl(
         baseGroups = c("Default Maptile", "Dark Maptile", "Satellite Maptile"),
         options = layersControlOptions(collapsed = FALSE)

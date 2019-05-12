@@ -17,9 +17,10 @@ library(sf)
 library(raster)
 library(spData)
 library(ggmap)
+library(xml2)
+library(rvest)
 
-
-#register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
+register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
 
 team_cities <- c("Madrid, Spain", "Barcelona, Spain", "Madrid, Spain", "Bilbao, Spain", "Valencia, Spain")
 
@@ -34,12 +35,44 @@ n_champions <- c(33, 25, 10, 8, 6)
 #cities_coord$City <- team_cities
 #is.data.frame(cities_coord)
 
+#Webscrape music festival data
+music_festivals = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/")
 
-data <- read.csv("worldearthquakes.csv")
-#categorize earthquake depth
+festivals <- music_festivals %>% 
+  html_nodes(".mobile-one-whole") %>%
+  html_text()
+
+n = length(festivals)
+festival_names = rep("", n)
+festival_locations = rep("", n)
+festival_dates = rep("", n)
+festival_end_dates = rep("", n)
+festival_cities_coord = rep(NA, n)
+
+for (i in 1:n){ 
+  festival_names[i] = gsub("\\,", "", (sub(".*\"\n  }\n},\n  \"name\": \"*(.*?) *\",\n  \"description\":.*", "\\1", festivals[i])))
+  
+  festival_locations[i] = paste(gsub("\\,", "", (sub(".*\"addressLocality\": \"*(.*?) *\",\n.*", "\\1", festivals[i]))), gsub("\\,", "", (sub(".*\",\n    \"addressRegion\": \" *(.*?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i]))))
+  
+  
+  festival_dates[i] = gsub("\\,", "", (sub(".*\n \"startDate\": \"*(.*?) *\",\n \"endDate\":.*", "\\1", festivals[i])))
+  
+  festival_end_dates[i] = gsub("\\,", "", (sub(".*\"endDate\": \"*(.*?) *\"\n.*", "\\1", festivals[i])))
+}
+
+data_festival = geocode(festival_locations, source = "google")
+
+data_festival$names =  festival_names
+data_festival$locations = festival_locations
+data_festival$dates = festival_dates
+
+is.data.frame(data_festival)
+
+
+#Get data on airports
 data1 = read.csv("largeairports.csv")
 
-data$depth_type <- ifelse(data$depth <= 70, "shallow", ifelse(data$depth <= 300 | data$depth >70, "intermediate", ifelse(data$depth > 300, "deep", "other")))
+
 
 
 # Define UI for application that draws a histogram
@@ -51,14 +84,14 @@ ui <- dashboardPage(skin = "blue",
                     dashboardSidebar(width = 300,
                                      
                                      tags$div(
-                                       tags$blockquote("Use this app to see where Google has tracked you!"),
-                                       #tags$p(checkboxInput("markers", "Depth", FALSE)),
-                                       tags$p(checkboxInput("heat", "Heatmap", FALSE)),
+                                       tags$blockquote("Use this app to see where to party next!"),
+                                       
                                        tags$p(checkboxInput("airports", "Airports", FALSE)),
+                                       tags$p(checkboxInput("festivals", "Festivals", FALSE)),
                                        #tags$p(checkboxInput("country", "Switzerland", FALSE)),
                                        textInput(inputId = "country", label = "Country", value = "Type country here", width = NULL,
                                                  placeholder = NULL),
-                                       tags$h4("How to get your Google location data:"),
+                                       tags$h4("Here we can explain what we did:"),
                                        tags$p("Visit ", tags$a(href="https://takeout.google.com/", "Google Takeout")," to see and download any of the data Google holds on you."),
                                        tags$p("Click on SELECT NONE, then scroll down to Location History and click on the slider to select it."),
                                        tags$p("Scroll to the bottom and click NEXT, then CREATE ARCHIVE, and finally DOWNLOAD when it is ready. You will need to verify by logging into your Google account."),
@@ -89,17 +122,7 @@ ui <- dashboardPage(skin = "blue",
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
-  #define the color pallate for the magnitidue of the earthquake
-  pal <- colorNumeric(
-    palette = c('gold', 'orange', 'dark orange', 'orange red', 'red', 'dark red'),
-    domain = data$mag)
   
-  
-  #define the color of for the depth of the earquakes
-  pal2 <- colorFactor(
-    palette = c('blue', 'yellow', 'red'),
-    domain = data$depth_type
-  )
   
   
   #create the map
@@ -109,9 +132,10 @@ server <- function(input, output, session) {
       addProviderTiles(providers$CartoDB.DarkMatter, group = "Dark Maptile") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>% 
-      #addCircles(lng =c(10,20,-10, 10.5, 10.6), lat = c(10, 10, 10, 10, 10), radius = 1000000, weight = 1, color = "#777777",popup="The birthplace of R") %>%
-      addPolygons(data = world[world$name_long == input$country, ], fill = TRUE) %>%
-      #addMarkers(data = cities_coord, popup=cities_coord$Teams, clusterOptions = markerClusterOptions())%>% 
+      # addMarkers(data = cities_coord) %>% 
+      #addCircles(data = data_festival, radius = 10000, weight = 1, color = "#777777",popup="The birthplace of R") %>%
+      #addPolygons(data = world[world$name_long == input$country, ], fill = TRUE) %>%
+      #addAwesomeMarkers(data = cities_coord)%>% 
       #addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))%>% 
       addLayersControl(
         baseGroups = c("Default Maptile", "Dark Maptile", "Satellite Maptile"),
@@ -124,28 +148,26 @@ server <- function(input, output, session) {
   
   observe({
     proxy <- leafletProxy("mymap", data = data)
-    proxy %>% clearMarkers()
+    #proxy %>% removeMarkerCluster(layerId = "airports")
     if (input$airports) {
       proxy %>% addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
       }
     else {
-      proxy %>% clearMarkerClusters() 
+     proxy  %>% clearMarkerClusters()
     }
   })
   
   observe({
     proxy <- leafletProxy("mymap", data = data)
-    proxy %>% clearMarkers()
-    if (input$heat) {
-      proxy %>%  addHeatmap(lng=~longitude, lat=~latitude, intensity = ~mag, blur =  10, max = 0.05, radius = 15)
-      
+    #proxy %>% removeMarkers(layerId = "festivals") 
+    if (input$festivals) {
+      proxy %>%  addMarkers(data = data_festival, popup=data_festival$names, icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
     }
-    else{
-      proxy %>% clearHeatmap() 
+    else {
+      proxy %>% clearMarkers()
     }
-    
-    
   })
+  
   
 }
 

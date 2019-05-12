@@ -132,11 +132,6 @@ server <- function(input, output, session) {
       addProviderTiles(providers$CartoDB.DarkMatter, group = "Dark Maptile") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>% 
-      # addMarkers(data = cities_coord) %>% 
-      #addCircles(data = data_festival, radius = 10000, weight = 1, color = "#777777",popup="The birthplace of R") %>%
-      #addPolygons(data = world[world$name_long == input$country, ], fill = TRUE) %>%
-      #addAwesomeMarkers(data = cities_coord)%>% 
-      #addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))%>% 
       addLayersControl(
         baseGroups = c("Default Maptile", "Dark Maptile", "Satellite Maptile"),
         options = layersControlOptions(collapsed = FALSE)
@@ -148,7 +143,6 @@ server <- function(input, output, session) {
   
   observe({
     proxy <- leafletProxy("mymap", data = data)
-    #proxy %>% removeMarkerCluster(layerId = "airports")
     if (input$airports) {
       proxy %>% addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
       }
@@ -159,7 +153,6 @@ server <- function(input, output, session) {
   
   observe({
     proxy <- leafletProxy("mymap", data = data)
-    #proxy %>% removeMarkers(layerId = "festivals") 
     if (input$festivals) {
       proxy %>%  addMarkers(data = data_festival, popup=data_festival$names, icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
     }

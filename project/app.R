@@ -19,25 +19,25 @@ library(spData)
 library(ggmap)
 
 
-register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
+#register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
 
 team_cities <- c("Madrid, Spain", "Barcelona, Spain", "Madrid, Spain", "Bilbao, Spain", "Valencia, Spain")
 
-cities_coord <- geocode(team_cities, source = "google")
+#cities_coord <- geocode(team_cities, source = "google")
 
 team <- c("Real Madrid", "FC Barcelona", "Atlético Madrid", "Athletic Bilbao", "Valencia")
 
 n_champions <- c(33, 25, 10, 8, 6)
 
-cities_coord$Teams <- team
-cities_coord$Champions <- n_champions
-cities_coord$City <- team_cities
-cities_coord
-is.data.frame(cities_coord)
+#cities_coord$Teams <- team
+#cities_coord$Champions <- n_champions
+#cities_coord$City <- team_cities
+#is.data.frame(cities_coord)
 
 
 data <- read.csv("worldearthquakes.csv")
 #categorize earthquake depth
+data1 = read.csv("largeairports.csv")
 
 data$depth_type <- ifelse(data$depth <= 70, "shallow", ifelse(data$depth <= 300 | data$depth >70, "intermediate", ifelse(data$depth > 300, "deep", "other")))
 
@@ -52,8 +52,9 @@ ui <- dashboardPage(skin = "blue",
                                      
                                      tags$div(
                                        tags$blockquote("Use this app to see where Google has tracked you!"),
-                                       tags$p(checkboxInput("markers", "Depth", FALSE)),
+                                       #tags$p(checkboxInput("markers", "Depth", FALSE)),
                                        tags$p(checkboxInput("heat", "Heatmap", FALSE)),
+                                       tags$p(checkboxInput("airports", "Airports", FALSE)),
                                        #tags$p(checkboxInput("country", "Switzerland", FALSE)),
                                        textInput(inputId = "country", label = "Country", value = "Type country here", width = NULL,
                                                  placeholder = NULL),
@@ -108,11 +109,10 @@ server <- function(input, output, session) {
       addProviderTiles(providers$CartoDB.DarkMatter, group = "Dark Maptile") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>% 
-      #addMarkers(~long, ~lat, popup="The birthplace of R") %>%
       #addCircles(lng =c(10,20,-10, 10.5, 10.6), lat = c(10, 10, 10, 10, 10), radius = 1000000, weight = 1, color = "#777777",popup="The birthplace of R") %>%
       addPolygons(data = world[world$name_long == input$country, ], fill = TRUE) %>%
-      #plot(world["pop"])   %>%
-      addMarkers(data = cities_coord, popup=cities_coord$Teams, clusterOptions = markerClusterOptions())%>% 
+      #addMarkers(data = cities_coord, popup=cities_coord$Teams, clusterOptions = markerClusterOptions())%>% 
+      #addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))%>% 
       addLayersControl(
         baseGroups = c("Default Maptile", "Dark Maptile", "Satellite Maptile"),
         options = layersControlOptions(collapsed = FALSE)
@@ -125,13 +125,11 @@ server <- function(input, output, session) {
   observe({
     proxy <- leafletProxy("mymap", data = data)
     proxy %>% clearMarkers()
-    if (input$markers) {
-      proxy %>% addCircleMarkers(stroke = FALSE, color = ~pal2(depth_type), fillOpacity = 0.2,      label = ~as.character(paste0("Magnitude: ", sep = " ", mag))) %>%
-        addLegend("bottomright", pal = pal2, values = data$depth_type,
-                  title = "Depth Type",
-                  opacity = 1)}
+    if (input$airports) {
+      proxy %>% addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
+      }
     else {
-      proxy %>% clearMarkers() %>% clearControls()
+      proxy %>% clearMarkerClusters() 
     }
   })
   
@@ -139,10 +137,11 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("mymap", data = data)
     proxy %>% clearMarkers()
     if (input$heat) {
-      proxy %>%  addHeatmap(lng=~longitude, lat=~latitude, intensity = ~mag, blur =  10, max = 0.05, radius = 15) 
+      proxy %>%  addHeatmap(lng=~longitude, lat=~latitude, intensity = ~mag, blur =  10, max = 0.05, radius = 15)
+      
     }
     else{
-      proxy %>% clearHeatmap()
+      proxy %>% clearHeatmap() 
     }
     
     

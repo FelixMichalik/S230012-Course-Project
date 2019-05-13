@@ -67,6 +67,9 @@ data1 = read.csv("largeairports.csv")
 data_beer = read.csv("beerprices.csv")
 pal = colorNumeric(palette = "RdYlBu", domain = c(max(data_beer[,3]), min(data_beer[,3])))
 
+#Get data on STI
+sti_data = c("United Kingdom", "Denmark", "Sweden", "Iceland", "Norway")
+sti_coord = geocode(sti_data, source = "google")
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(skin = "blue",
@@ -196,7 +199,11 @@ server <- function(input, output, session) {
                                                                                                                                                                    data_festival$dates), icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
     }
     
-    else {
+    if(input$sti){
+      proxy %>% clearMarkers() %>%  addMarkers(data = sti_coord, icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/happy-valentine-s-day-sex-shop/64/condom_sex_safety_contraception-512.png", iconWidth = 35, iconHeight = 35), label = htmlEscape("Stay safe ;)"))
+    }
+    
+    if(!input$festivals && !input$sti) {
       proxy %>% clearMarkers()
     }
   })
@@ -235,7 +242,10 @@ server <- function(input, output, session) {
       proxy %>% clearShapes() %>% addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"))),], fillColor = "red", label = htmlEscape("Consider taking a cab, cause there is no Uber here"), stroke = FALSE) %>%
         addPolygons(data = world[world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"),], fillColor = "green", label = htmlEscape("There is Uber here!"), stroke = FALSE) 
     }
-    if(!input$prostitution && !input$weed && !input$uber) {
+    if(input$sti){
+      proxy %>% clearShapes() %>% addPolygons(data = world[world$name_long %in% sti_data,], fillColor = "red", stroke = FALSE) 
+    }
+    if(!input$prostitution && !input$weed && !input$uber && !input$sti) {
       proxy %>% clearShapes()}
   })
   

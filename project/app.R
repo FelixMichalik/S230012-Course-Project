@@ -19,21 +19,12 @@ library(spData)
 library(ggmap)
 library(xml2)
 library(rvest)
-
+library(htmltools)
+library(spData)
+library(tidyverse)
 register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
 
-team_cities <- c("Madrid, Spain", "Barcelona, Spain", "Madrid, Spain", "Bilbao, Spain", "Valencia, Spain")
 
-#cities_coord <- geocode(team_cities, source = "google")
-
-team <- c("Real Madrid", "FC Barcelona", "Atlético Madrid", "Athletic Bilbao", "Valencia")
-
-n_champions <- c(33, 25, 10, 8, 6)
-
-#cities_coord$Teams <- team
-#cities_coord$Champions <- n_champions
-#cities_coord$City <- team_cities
-#is.data.frame(cities_coord)
 
 #Webscrape music festival data
 music_festivals = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/")
@@ -64,7 +55,7 @@ data_festival = geocode(festival_locations, source = "google")
 
 data_festival$names =  festival_names
 data_festival$locations = festival_locations
-data_festival$dates = festival_dates
+data_festival$dates = as.Date(festival_dates, "%B %d %Y")
 
 is.data.frame(data_festival)
 
@@ -72,7 +63,9 @@ is.data.frame(data_festival)
 #Get data on airports
 data1 = read.csv("largeairports.csv")
 
-
+#Get data on beer prices
+data_beer = read.csv("beerprices.csv")
+#pal = colorNumeric(palette = "RdYlBu", domain = c(min(data_beer$price), max(data_beer$price)))
 
 
 # Define UI for application that draws a histogram
@@ -88,9 +81,26 @@ ui <- dashboardPage(skin = "blue",
                                        
                                        tags$p(checkboxInput("airports", "Airports", FALSE)),
                                        tags$p(checkboxInput("festivals", "Festivals", FALSE)),
+                                       
+                                       #tags$p(checkboxInput("time", "Use time?", FALSE)),
+                                       #tags$p(sliderInput(inputId = "dateRange", 
+                                        #           label = "Date & time:", 
+                                         #          min = min(data_festival$dates), max = max(data_festival$dates),
+                                          #         value= c(min(data_festival$dates), max = max(data_festival$dates))
+                                     #  )),
+                                     tags$p(dateInput('minDate',
+                                                      label = 'From:',
+                                                      value = min(data_festival$dates)
+                                     )),
+                                       tags$p(dateInput('maxDate',
+                                                  label = 'To:',
+                                                     value = max(data_festival$dates)
+                                       )),
                                        #tags$p(checkboxInput("country", "Switzerland", FALSE)),
-                                       textInput(inputId = "country", label = "Country", value = "Type country here", width = NULL,
-                                                 placeholder = NULL),
+                                     tags$p(checkboxInput("checkBeer", "See beer prices", FALSE)),
+                                     sliderInput(inputId = "beer", "Beer price", min(data_beer$price)+1, max(data_beer$price), value = max(data_beer$price)),
+                                       #textInput(inputId = "country", label = "Country", value = "Switzerland", width = NULL,
+                                        #         placeholder = NULL),
                                        tags$h4("Here we can explain what we did:"),
                                        tags$p("Visit ", tags$a(href="https://takeout.google.com/", "Google Takeout")," to see and download any of the data Google holds on you."),
                                        tags$p("Click on SELECT NONE, then scroll down to Location History and click on the slider to select it."),
@@ -100,6 +110,8 @@ ui <- dashboardPage(skin = "blue",
                                        style = "padding: 10px;"
                                        
                                      )
+                                     
+                                     
                                      
                                      
                                      
@@ -122,8 +134,16 @@ ui <- dashboardPage(skin = "blue",
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
-  
-  
+  filteredData = reactive({
+   
+   a = filter(data_beer, price <= input$beer)
+   qpal <- colorQuantile("Blues", a[,3], n = 7)
+    a[,1]
+ })
+  filteredDatacol = reactive({
+    a = filter(data_beer, price <= input$beer)
+    a[,3]
+  })
   
   #create the map
   output$mymap <- renderLeaflet({
@@ -132,6 +152,7 @@ server <- function(input, output, session) {
       addProviderTiles(providers$CartoDB.DarkMatter, group = "Dark Maptile") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>% 
+      #addPolygons(fill = TRUE)%>% 
       addLayersControl(
         baseGroups = c("Default Maptile", "Dark Maptile", "Satellite Maptile"),
         options = layersControlOptions(collapsed = FALSE)
@@ -144,7 +165,7 @@ server <- function(input, output, session) {
   observe({
     proxy <- leafletProxy("mymap", data = data)
     if (input$airports) {
-      proxy %>% addMarkers(data = data1, popup=data1$name, clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
+      proxy %>% addMarkers(data = data1, label = htmlEscape(data1$name), clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
       }
     else {
      proxy  %>% clearMarkerClusters()
@@ -154,14 +175,29 @@ server <- function(input, output, session) {
   observe({
     proxy <- leafletProxy("mymap", data = data)
     if (input$festivals) {
-      proxy %>%  addMarkers(data = data_festival, popup=data_festival$names, icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
+      #fdata = data_festival[data_festival$dates %in% input$dateRange),]
+      proxy %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
+                                                                                                                                                                   data_festival$names,
+                                                                                                                                                                   gsub(" ", ", ", data_festival$locations, fixed = TRUE),
+                                                                                                                                                                   data_festival$dates), icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
     }
+    
     else {
       proxy %>% clearMarkers()
     }
   })
   
-  
+  observe({
+    proxy <- leafletProxy("mymap", data = filteredData()) 
+    if (input$checkBeer) {
+    proxy %>% clearShapes() %>% 
+      addPolygons(data = world[world$name_long %in% filteredData(),], stroke = FALSE, smoothFactor = 0.2, fillOpacity = 1, color = colorQuantile("Blues", filteredDatacol(), n = 7)(filteredDatacol()), label = htmlEscape(paste(filteredDatacol(), "$US")))
+    }
+  })
+  #    for(i in 1:nrow(data_beer)){
+   #     if(input$beer >= data_beer[i,3]){
+ #   proxy %>% addPolygons(data = world[world$name_long == data_beer[i,1], ], fill = TRUE)
+#  }}})
 }
 
 # Run the application 

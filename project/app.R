@@ -70,16 +70,25 @@ data_beer = read.csv("beerprices.csv")
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(skin = "blue",
-                    title = "Google Location Map",
-                    dashboardHeader(title = "Google Location Map", titleWidth = 300),
+                    title = "Party Index Map",
+                    dashboardHeader(title = "Party Index Map", titleWidth = 300),
                     
                     # interactive sidebar with menu and widgets
                     dashboardSidebar(width = 300,
+                                     tags$head(
+                                       tags$style(HTML(".sidebar {
+                      height: 90vh; overflow-y: auto;
+                    }"
+                                       ) # close HTML       
+                                       )            # close tags$style
+                                     ),
                                      
                                      tags$div(
                                        tags$blockquote("Use this app to see where to party next!"),
-                                       
+                                       tags$p("Transportation"),
                                        tags$p(checkboxInput("airports", "Airports", FALSE)),
+                                       tags$p(checkboxInput("uber", "Countries with Uber", FALSE)),
+                                       tags$p("What's going on?"),
                                        tags$p(checkboxInput("festivals", "Festivals", FALSE)),
                                        
                                        #tags$p(checkboxInput("time", "Use time?", FALSE)),
@@ -97,7 +106,12 @@ ui <- dashboardPage(skin = "blue",
                                                      value = max(data_festival$dates)
                                        )),
                                        #tags$p(checkboxInput("country", "Switzerland", FALSE)),
-                                     tags$p(checkboxInput("checkBeer", "See beer prices", FALSE)),
+                                     tags$p("Compare by"),
+                                     tags$p(checkboxInput("prostitution", "Prostitution", FALSE)),
+                                     tags$p(checkboxInput("weed", "Weed", FALSE)),
+                                     tags$p(checkboxInput("sti", "Countries with highest propensity (at least 10% risk) of STI infection", FALSE)),
+                                     tags$p("Compare beer prices:"),
+                                     tags$p(checkboxInput("checkBeer", "Display beer index", FALSE)),
                                      sliderInput(inputId = "beer", "Beer price", min(data_beer$price)+1, max(data_beer$price), value = max(data_beer$price)),
                                        #textInput(inputId = "country", label = "Country", value = "Switzerland", width = NULL,
                                         #         placeholder = NULL),
@@ -176,7 +190,7 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("mymap", data = data)
     if (input$festivals) {
       #fdata = data_festival[data_festival$dates %in% input$dateRange),]
-      proxy %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
+      proxy %>% clearMarkers() %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
                                                                                                                                                                    data_festival$names,
                                                                                                                                                                    gsub(" ", ", ", data_festival$locations, fixed = TRUE),
                                                                                                                                                                    data_festival$dates), icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
@@ -191,13 +205,34 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("mymap", data = filteredData()) 
     if (input$checkBeer) {
     proxy %>% clearShapes() %>% 
-      addPolygons(data = world[world$name_long %in% filteredData(),], stroke = FALSE, smoothFactor = 0.2, fillOpacity = 1, color = colorQuantile("Blues", filteredDatacol(), n = 7)(filteredDatacol()), label = htmlEscape(paste(filteredDatacol(), "$US")))
-    }
+      addPolygons(data = world[world$name_long %in% filteredData(),], stroke = FALSE, smoothFactor = 0.2, fillOpacity = 1, color = colorQuantile("Blues", filteredDatacol(), n = 7)(filteredDatacol()), label = htmlEscape(paste(data_beer[world[world$name_long %in% filteredData(),]$name_long %in% data_beer$country,], "$US")))
+    }else {
+      proxy %>% clearShapes()}
   })
+  
+
   #    for(i in 1:nrow(data_beer)){
    #     if(input$beer >= data_beer[i,3]){
  #   proxy %>% addPolygons(data = world[world$name_long == data_beer[i,1], ], fill = TRUE)
 #  }}})
+  
+  observe({
+    proxy <- leafletProxy("mymap", data = data) 
+    if (input$prostitution) {
+     # proxy %>% clearShapes() %>% addPolygons(data = world[world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"),], fillColor = "green", label = htmlEscape("Prostitution is legal here"), stroke = FALSE) %>% 
+      #  addPolygons(data = world[world$name_long %in% c("Albania", "Andorra", "Armenia", "Austria", "Azerbaijan", "Belarus", "Bosnia", "Bulgaria", "Croatia", "Cyprus", "Czechia",  "Estonia", "France", "Georgia", "Greece", "Hungary", "Iceland", "Ireland", "Kazakhstan", "Kosovo", "Latvia", " Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", " Montenegro", "Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Sweden", "Turkey", "Ukraine", "United Kingdom"),], fillColor = "red", label = htmlEscape("Prostitution is illegal here"), stroke = FALSE)
+      proxy %>% clearShapes() %>% addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"))),], fillColor = "red", label = htmlEscape("Prostitution is legal here"), stroke = FALSE) %>%
+        addPolygons(data = world[world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"),], fillColor = "green", label = htmlEscape("Prostitution is legal here"), stroke = FALSE) 
+         } else if(input$weed) {
+      proxy %>% clearShapes() %>% addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands"))),], fillColor = "red", label = htmlEscape("Weed is legal here"), stroke = FALSE) %>%
+        addPolygons(data = world[world$name_long %in% c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands"),], fillColor = "green", label = htmlEscape("Weed is legal here"), stroke = FALSE) 
+    }else if(input$uber) {
+      proxy %>% clearShapes() %>% addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"))),], fillColor = "red", label = htmlEscape("Consider taking a cab, cause there is no Uber here"), stroke = FALSE) %>%
+        addPolygons(data = world[world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"),], fillColor = "green", label = htmlEscape("There is Uber here!"), stroke = FALSE) 
+    }else {
+      proxy %>% clearShapes()}
+  })
+  
 }
 
 # Run the application 

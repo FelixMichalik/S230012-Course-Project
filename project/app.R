@@ -128,7 +128,7 @@ ui <- dashboardPage(skin = "blue",
                                         #         placeholder = NULL),
                                      tags$div(
                                        tags$h4("Here we can explain what we did:"),
-                                       tags$p("Visit ", tags$a(href="https://takeout.google.com/", "Google Takeout")," to see and download any of the data Google holds on you."),
+                                       tags$p("For a full overview over our data please see our", tags$a(href="https://github.com/FelixMichalik/project/blob/master/README.md", "README file"),"."),
                                        tags$p("Click on SELECT NONE, then scroll down to Location History and click on the slider to select it."),
                                        tags$p("Scroll to the bottom and click NEXT, then CREATE ARCHIVE, and finally DOWNLOAD when it is ready. You will need to verify by logging into your Google account."),
                                        tags$p("This will download a ZIP file to your downloads directory. Extract this ZIP file which will create a directory called Takeout"),

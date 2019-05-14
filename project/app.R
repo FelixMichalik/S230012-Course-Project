@@ -41,44 +41,46 @@ for (child in music_festivals3children) {
 }
 
 music_festivals4 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/4/")
-music_festivals4children <- xml_children(music_festivals3)
+music_festivals4children <- xml_children(music_festivals4)
 for (child in music_festivals4children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals5 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/5/")
-music_festivals5children <- xml_children(music_festivals3)
+music_festivals5children <- xml_children(music_festivals5)
 for (child in music_festivals5children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals6 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/6/")
-music_festivals6children <- xml_children(music_festivals3)
+music_festivals6children <- xml_children(music_festivals6)
 for (child in music_festivals6children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals7 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/7/")
-music_festivals7children <- xml_children(music_festivals3)
+music_festivals7children <- xml_children(music_festivals7)
 for (child in music_festivals7children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals8 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/8/")
-music_festivals8children <- xml_children(music_festivals3)
+music_festivals8children <- xml_children(music_festivals8)
 for (child in music_festivals8children) {
   xml_add_child(music_festivals, child)
 }
 music_festivals9 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/9/")
-music_festivals9children <- xml_children(music_festivals3)
+music_festivals9children <- xml_children(music_festivals9)
 for (child in music_festivals9children) {
   xml_add_child(music_festivals, child)
 }
 music_festivals10 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/10/")
-music_festivals10children <- xml_children(music_festivals3)
+music_festivals10children <- xml_children(music_festivals10)
 for (child in music_festivals10children) {
   xml_add_child(music_festivals, child)
 }
+
+
 
 festivals <- music_festivals %>% 
   html_nodes(".mobile-one-whole") %>%

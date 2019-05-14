@@ -181,8 +181,8 @@ f_beer <- rep(5.67, length(f_names))
 prices_beer <- data_beer
 for (n in 1:length(f_names)) {
   for(z in 1:177){
-    if (f_locations[n] == prices_beer[,1][z]) {
-      f_beer[n] = prices_beer[,3][z]
+    if (f_locations[n] == prices_beer[z,1]) {
+      f_beer[n] = prices_beer[z,3]
     }
   }
 } 
@@ -281,6 +281,11 @@ server <- function(input, output, session) {
    
     a[,]
  })
+  
+  table_data = reactive({
+    
+    compiled$Country == input$inCountry
+  })
  # filteredDatacol = reactive({
   #  a = filter(data_beer, price <= input$beer)
    # a
@@ -302,7 +307,7 @@ server <- function(input, output, session) {
   })
   #create the Table
   output$countryData <- renderTable({
-    stateFilter <-subset(compiled, compiled$Country == input$inCountry)
+    stateFilter <-subset(compiled, table_data())
   })
   
   #next we use the observe function to make the checkboxes dynamic. If you leave this part out you will see that the checkboxes, when clicked on the first time, display our filters...But if you then uncheck them they stay on. So we need to tell the server to update the map when the checkboxes are unchecked.

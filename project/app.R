@@ -28,6 +28,57 @@ register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
 
 #Webscrape music festival data
 music_festivals = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/")
+music_festivals2 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/2/")
+music_festivals2children <- xml_children(music_festivals2)
+for (child in music_festivals2children) {
+  xml_add_child(music_festivals, child)
+}
+
+music_festivals3 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/3/")
+music_festivals3children <- xml_children(music_festivals3)
+for (child in music_festivals3children) {
+  xml_add_child(music_festivals, child)
+}
+
+music_festivals4 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/4/")
+music_festivals4children <- xml_children(music_festivals3)
+for (child in music_festivals4children) {
+  xml_add_child(music_festivals, child)
+}
+
+music_festivals5 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/5/")
+music_festivals5children <- xml_children(music_festivals3)
+for (child in music_festivals5children) {
+  xml_add_child(music_festivals, child)
+}
+
+music_festivals6 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/6/")
+music_festivals6children <- xml_children(music_festivals3)
+for (child in music_festivals6children) {
+  xml_add_child(music_festivals, child)
+}
+
+music_festivals7 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/7/")
+music_festivals7children <- xml_children(music_festivals3)
+for (child in music_festivals7children) {
+  xml_add_child(music_festivals, child)
+}
+
+music_festivals8 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/8/")
+music_festivals8children <- xml_children(music_festivals3)
+for (child in music_festivals8children) {
+  xml_add_child(music_festivals, child)
+}
+music_festivals9 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/9/")
+music_festivals9children <- xml_children(music_festivals3)
+for (child in music_festivals9children) {
+  xml_add_child(music_festivals, child)
+}
+music_festivals10 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/10/")
+music_festivals10children <- xml_children(music_festivals3)
+for (child in music_festivals10children) {
+  xml_add_child(music_festivals, child)
+}
 
 festivals <- music_festivals %>% 
   html_nodes(".mobile-one-whole") %>%
@@ -70,6 +121,81 @@ pal = colorNumeric(palette = "RdYlBu", domain = c(max(data_beer[,3]), min(data_b
 #Get data on STI
 sti_data = c("United Kingdom", "Denmark", "Sweden", "Iceland", "Norway")
 sti_coord = geocode(sti_data, source = "google")
+
+
+#create Data Frame
+
+f_names <- music_festivals %>%
+  html_nodes("h2") %>%
+  html_text()
+f_locations <- music_festivals %>%
+  html_nodes(".search-meta") %>%
+  html_text()
+
+f_countries <- rep(NA, length(f_names))
+for (i in 1:length(f_names)) {
+  f_locations2 = strsplit(f_locations, split = "\n           ", fixed = T)[[i]]
+  f_country = strsplit(f_locations2, split = ", ", fixed = T)[[2]]
+  f_countries[i] = f_country[2]
+}
+rm(f_locations, f_locations2, f_country, f_country2)
+
+f_prostitution <- rep(NA, length(f_names))
+prostitution_legal <- c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "The Netherlands", "Spain")
+for (j in 1:length(f_names)) {
+  if (f_countries[j] %in% prostitution_legal ) {
+    f_prostitution[j] = "Yes"
+  }else{
+    f_prostitution[j] = "No"
+  } 
+} 
+rm(prostitution_legal)
+
+f_weed <- rep(NA, length(f_names))
+weed_legal <- c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands", "The Netherlands")
+for (k in 1:length(f_names)) {
+  if (f_countries[k] %in% weed_legal ) {
+    f_weed[k] = "Yes"
+  }else{
+    f_weed[k] = "No"
+  } 
+}  
+rm(weed_legal)
+
+f_uber <- rep(NA, length(f_names))
+is_there_uber <- c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "The Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom")
+for (l in 1:length(f_names)) {
+  if (f_countries[l] %in% is_there_uber ) {
+    f_uber[l] = "Yes"
+  }else{
+    f_uber[l] = "No"
+  } 
+}  
+rm(is_there_uber)
+
+f_sti <- rep(NA, length(f_names))
+high_risk <- c("United Kingdom", "Denmark", "Sweden", "Iceland", "Norway")
+for (m in 1:length(f_names)) {
+  if (f_countries[m] %in% high_risk ) {
+    f_sti[m] = "High risk! (>10%)"
+  }else{
+    f_sti[m] = "All good (<10%)"
+  } 
+}  
+rm(high_risk)
+
+f_beer <- rep(5.67, length(f_names))
+prices_beer <- data_beer
+for (n in 1:length(f_names)) {
+  for(z in 1:177){
+    if (f_countries[n] == prices_beer[,1][z]) {
+      f_beer[n] = prices_beer[,3][z]
+    }
+  }
+} 
+
+compiled <- data.frame("Country" = f_countries, "Festival" = f_names, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
+
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(skin = "blue",
@@ -126,6 +252,8 @@ ui <- dashboardPage(skin = "blue",
                                     
                                        #textInput(inputId = "country", label = "Country", value = "Switzerland", width = NULL,
                                         #         placeholder = NULL),
+                                     selectInput("inCountry", "Select a country", choices = compiled$Country),
+                                     
                                      tags$div(
                                        tags$h4("Here we can explain what we did:"),
                                        tags$p("For a full overview over our data please see our", tags$a(href="https://github.com/FelixMichalik/project/blob/master/README.md", "README file"),"."),
@@ -143,7 +271,8 @@ ui <- dashboardPage(skin = "blue",
                       
                       tags$head(tags$style("#mymap{height:90vh !important;}")),
                       
-                      leafletOutput(outputId = "mymap")
+                      leafletOutput(outputId = "mymap"),
+                      tableOutput("countryData")
                       
                       
                       
@@ -177,6 +306,10 @@ server <- function(input, output, session) {
         options = layersControlOptions(collapsed = FALSE)
       )
     
+  })
+  #create the Table
+  output$countryData <- renderTable({
+    stateFilter <-subset(compiled, compiled$Country == input$inCountry)
   })
   
   #next we use the observe function to make the checkboxes dynamic. If you leave this part out you will see that the checkboxes, when clicked on the first time, display our filters...But if you then uncheck them they stay on. So we need to tell the server to update the map when the checkboxes are unchecked.
@@ -257,96 +390,3 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
-#Search info by country (table)
-
-f_names <- music_festivals %>%
-  html_nodes("h2") %>%
-  html_text()
-f_locations <- music_festivals %>%
-  html_nodes(".search-meta") %>%
-  html_text()
-
-f_countries <- rep(NA, length(f_names))
-for (i in 1:length(f_names)) {
-  f_locations2 = strsplit(f_locations, split = "\n           ", fixed = T)[[i]]
-  f_country = strsplit(f_locations2, split = ", ", fixed = T)[[2]]
-  f_countries[i] = f_country[2]
-}
-rm(f_locations, f_locations2, f_country, f_country2)
-
-f_prostitution <- rep(NA, length(f_names))
-prostitution_legal <- c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "The Netherlands", "Spain")
-for (j in 1:length(f_names)) {
-  if (f_countries[j] %in% prostitution_legal ) {
-    f_prostitution[j] = "Yes"
-  }else{
-    f_prostitution[j] = "No"
-  } 
-} 
-rm(prostitution_legal)
-
-f_weed <- rep(NA, length(f_names))
-weed_legal <- c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands", "The Netherlands")
-for (k in 1:length(f_names)) {
-  if (f_countries[k] %in% weed_legal ) {
-    f_weed[k] = "Yes"
-  }else{
-    f_weed[k] = "No"
-  } 
-}  
-rm(weed_legal)
-
-f_uber <- rep(NA, length(f_names))
-is_there_uber <- c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "The Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom")
-for (l in 1:length(f_names)) {
-  if (f_countries[l] %in% is_there_uber ) {
-    f_uber[l] = "Yes"
-  }else{
-    f_uber[l] = "No"
-  } 
-}  
-rm(is_there_uber)
-
-f_sti <- rep(NA, length(f_names))
-high_risk <- c("United Kingdom", "Denmark", "Sweden", "Iceland", "Norway")
-for (m in 1:length(f_names)) {
-  if (f_countries[m] %in% high_risk ) {
-    f_sti[m] = "High risk! (>10%)"
-  }else{
-    f_sti[m] = "All good (<10%)"
-  } 
-}  
-rm(high_risk)
-
-f_beer <- rep(5.67, length(f_names))
-prices_beer <- read.csv("beerprices.csv")
-for (n in 1:length(f_names)) {
-  for(z in 1:177){
-    if (f_countries[n] == prices_beer$country[z]) {
-      f_beer[n] = prices_beer$price[z]
-    }
-  }
-} 
-
-compiled <- data.frame("Country" = f_countries, "Festival" = f_names, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
-
-#ui
-fluidPage(
-  titlePanel("Search for info by country here:"),
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("inCountry", "Select a country", choices = compiled$Country)
-    ),
-    mainPanel(
-      tableOutput("countryData")
-    )
-  )
-)
-
-#server
-shinyServer(function(input, output){
-  output$countryData <- renderTable({
-    stateFilter <-subset(compiled, compiled$Country == input$inCountry)
-  })
-})

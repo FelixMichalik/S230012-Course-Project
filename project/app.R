@@ -90,24 +90,25 @@ ui <- dashboardPage(skin = "blue",
                                      tags$div(
                                       tags$blockquote("Use this app to see where to party next!"),
                                        tags$b("Display:"),
-                                       style = "padding: 10px;"),
+                                       style = "padding-left: 10px;"),
                                        checkboxInput("airports", "Airports", FALSE),
                                        checkboxInput("sti", "Countries with highest propensity (at least 10% risk) of STI infection", FALSE),
                                        
-                                       tags$div(tags$b("What's going on?"),style = "padding: 10px;"),
+                                       tags$div(tags$b("What's going on?"),style = "padding-left: 10px;"),
                                        
-                                       checkboxInput("festivals", "Festivals", FALSE),
-                                       dateInput('minDate',
+                                       checkboxInput("festivals", "Festivals", FALSE), 
+                                     tags$div(
+                                       tags$p(dateInput('minDate',
                                                       label = 'From:',
                                                       value = min(data_festival$dates)
                                      ),
                                        dateInput('maxDate',
                                                   label = 'To:',
                                                      value = max(data_festival$dates)
-                                       ),
+                                       )), style = "padding-left: 30px;"),
                                        #tags$p(checkboxInput("country", "Switzerland", FALSE)),
                                      
-                                     tags$div(tags$b("Compare countries by"), style = "padding: 10px;"),
+                                     tags$div(tags$b("Compare countries by"), style = "padding-left: 10px;"),
                                      tabsetPanel(
                                        tabPanel("Other", checkboxInput("uber", "Is Uber available?", FALSE), checkboxInput("prostitution", "Is prostitution legal?", FALSE), checkboxInput("weed", "Is weed legal?", FALSE)),
                                        tabPanel("Beer Prices",checkboxInput("checkBeer", "Display beer prices", FALSE), sliderInput(inputId = "beer", "Select price range", min(data_beer$price)+0.9, max(data_beer$price), value = max(data_beer$price)))

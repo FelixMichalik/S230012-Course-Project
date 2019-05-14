@@ -93,15 +93,15 @@ festival_end_dates = rep("", n)
 festival_cities_coord = rep(NA, n)
 
 for (i in 1:n){ 
-  festival_names[i] = gsub("\\,", "", (sub(".\"\n  }\n},\n  \"name\": \"(.?) *\",\n  \"description\":.", "\\1", festivals[i])))
+  festival_names[i] = gsub("\\,", "", (sub(".*\"\n  }\n},\n  \"name\": \"*(.*?) *\",\n  \"description\":.*", "\\1", festivals[i])))
   
-  festival_locations[i] = paste(gsub("\\,", "", (sub(".\"addressLocality\": \"(.?) *\",\n.", "\\1", festivals[i]))), gsub("\\,", "", (sub(".\",\n    \"addressRegion\": \" *(.?) \"\n  }\n},\n  \"name\":.", "\\1", festivals[i]))))
+  festival_locations[i] = paste(gsub("\\,", "", (sub(".*\"addressLocality\": \"*(.*?) *\",\n.*", "\\1", festivals[i]))), gsub("\\,", "", (sub(".*\",\n    \"addressRegion\": \" *(.*?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i]))))
   
-  festival_country[i] = gsub("\\,", "", (sub(".,\n    \"addressRegion\": \" *(.?) \"\n  }\n},\n  \"name\":.", "\\1", festivals[i])))
+  festival_country[i] = gsub("\\,", "", (sub(".*,\n    \"addressRegion\": \" *(.?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i])))
   
-  festival_dates[i] = gsub("\\,", "", (sub(".\n \"startDate\": \"(.?) *\",\n \"endDate\":.", "\\1", festivals[i])))
+  festival_dates[i] = gsub("\\,", "", (sub(".*\n \"startDate\": \"*(.*?) *\",\n \"endDate\":.*", "\\1", festivals[i])))
   
-  festival_end_dates[i] = gsub("\\,", "", (sub(".\"endDate\": \"(.?) *\"\n.", "\\1", festivals[i])))
+  festival_end_dates[i] = gsub("\\,", "", (sub(".*\"endDate\": \"*(.*?) *\"\n.*", "\\1", festivals[i])))
 }
 
 data_festival = geocode(festival_locations, source = "google")

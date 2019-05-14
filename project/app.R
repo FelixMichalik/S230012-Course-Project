@@ -80,60 +80,61 @@ ui <- dashboardPage(skin = "blue",
                     dashboardSidebar(width = 300,
                                      tags$head(
                                        tags$style(HTML(".sidebar {
-                      height: 90vh; overflow-y: auto;
+                      height: 90vh; overflow-y: auto; 
                     }"
                                        ) # close HTML       
                                        )            # close tags$style
                                      ),
+                                     #sidebarMenu(
                                      
                                      tags$div(
-                                       tags$blockquote("Use this app to see where to party next!"),
-                                       tags$p("Transportation"),
-                                       tags$p(checkboxInput("airports", "Airports", FALSE)),
-                                       tags$p(checkboxInput("uber", "Countries with Uber", FALSE)),
-                                       tags$p("What's going on?"),
-                                       tags$p(checkboxInput("festivals", "Festivals", FALSE)),
+                                      tags$blockquote("Use this app to see where to party next!"),
+                                       tags$b("Display:"),
+                                       style = "padding: 10px;"),
+                                       checkboxInput("airports", "Airports", FALSE),
+                                       checkboxInput("sti", "Countries with highest propensity (at least 10% risk) of STI infection", FALSE),
                                        
-                                       #tags$p(checkboxInput("time", "Use time?", FALSE)),
-                                       #tags$p(sliderInput(inputId = "dateRange", 
-                                        #           label = "Date & time:", 
-                                         #          min = min(data_festival$dates), max = max(data_festival$dates),
-                                          #         value= c(min(data_festival$dates), max = max(data_festival$dates))
-                                     #  )),
-                                     tags$p(dateInput('minDate',
+                                       tags$div(tags$b("What's going on?"),style = "padding: 10px;"),
+                                       
+                                       checkboxInput("festivals", "Festivals", FALSE),
+                                       dateInput('minDate',
                                                       label = 'From:',
                                                       value = min(data_festival$dates)
-                                     )),
-                                       tags$p(dateInput('maxDate',
+                                     ),
+                                       dateInput('maxDate',
                                                   label = 'To:',
                                                      value = max(data_festival$dates)
-                                       )),
+                                       ),
                                        #tags$p(checkboxInput("country", "Switzerland", FALSE)),
-                                     tags$p("Compare by"),
-                                     tags$p(checkboxInput("prostitution", "Prostitution", FALSE)),
-                                     tags$p(checkboxInput("weed", "Weed", FALSE)),
-                                     tags$p(checkboxInput("sti", "Countries with highest propensity (at least 10% risk) of STI infection", FALSE)),
-                                     tags$p("Compare beer prices:"),
-                                     tags$p(checkboxInput("checkBeer", "Display beer index", FALSE)),
-                                     sliderInput(inputId = "beer", "Beer price", min(data_beer$price)+0.9, max(data_beer$price), value = max(data_beer$price)),
+                                     
+                                     tags$div(tags$b("Compare countries by"), style = "padding: 10px;"),
+                                     tabsetPanel(
+                                       tabPanel("Other", checkboxInput("uber", "Is Uber available?", FALSE), checkboxInput("prostitution", "Is prostitution legal?", FALSE), checkboxInput("weed", "Is weed legal?", FALSE)),
+                                       tabPanel("Beer Prices",checkboxInput("checkBeer", "Display beer prices", FALSE), sliderInput(inputId = "beer", "Select price range", min(data_beer$price)+0.9, max(data_beer$price), value = max(data_beer$price)))
+                                     ),
+                                     #tags$hr(),
+                                     
+                                     #tags$p(checkboxInput("prostitution", "Prostitution", FALSE)),
+                                     #tags$p(checkboxInput("weed", "Weed", FALSE)),
+                                     
+                                     #selectInput("abc", "ABC", c("a", "b","c"), selected = NULL),
+                                     
+                                     
+                                     #tags$p("Compare beer prices:"),
+                                     #tags$p(checkboxInput("checkBeer", "Display beer index", FALSE)),
+                                    
                                        #textInput(inputId = "country", label = "Country", value = "Switzerland", width = NULL,
                                         #         placeholder = NULL),
+                                     tags$div(
                                        tags$h4("Here we can explain what we did:"),
                                        tags$p("Visit ", tags$a(href="https://takeout.google.com/", "Google Takeout")," to see and download any of the data Google holds on you."),
                                        tags$p("Click on SELECT NONE, then scroll down to Location History and click on the slider to select it."),
                                        tags$p("Scroll to the bottom and click NEXT, then CREATE ARCHIVE, and finally DOWNLOAD when it is ready. You will need to verify by logging into your Google account."),
                                        tags$p("This will download a ZIP file to your downloads directory. Extract this ZIP file which will create a directory called Takeout"),
                                        tags$p("Upload the JSON file found in Takeout/Location History using the selector below..."),
-                                       style = "padding: 10px;"
-                                       
-                                     )
-                                     
-                                     
-                                     
-                                     
-                                     
-                                     
-                                     
+                                     style = "padding: 10px;")
+                                   #  ) 
+                               
                     ),
                     
                     # Main panel for displaying outputs ----
@@ -154,7 +155,7 @@ server <- function(input, output, session) {
   filteredData = reactive({
    
    a = filter(data_beer, price <= input$beer)
-   qpal <- colorQuantile("Blues", a[,3], n = 7)
+   
     a[,]
  })
  # filteredDatacol = reactive({
@@ -182,7 +183,8 @@ server <- function(input, output, session) {
   observe({
     proxy <- leafletProxy("mymap", data = data1)
     if (input$airports) {
-      proxy %>% addMarkers(data = data1, label = htmlEscape(data1$name), clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
+      proxy %>% 
+        addMarkers(data = data1, label = htmlEscape(data1$name), clusterOptions = markerClusterOptions(), icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/city-elements-colored-lineal-style/512/airportbuildingtravellingtransportaion-512.png", iconWidth = 35, iconHeight = 35))
       }
     else {
      proxy  %>% clearMarkerClusters()
@@ -191,21 +193,25 @@ server <- function(input, output, session) {
   
   observe({
     proxy <- leafletProxy("mymap", data = data_festival)
-    if (input$festivals) {
+   proxy %>% clearMarkers()
+   if(!input$sti || !input$sti){
+     proxy %>% clearMarkers()
+   }
+    if (input$festivals){
       #fdata = data_festival[data_festival$dates %in% input$dateRange),]
-      proxy %>% clearMarkers() %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
+      proxy %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
                                                                                                                                                                    data_festival$names,
                                                                                                                                                                    gsub(" ", ", ", data_festival$locations, fixed = TRUE),
                                                                                                                                                                    data_festival$dates), icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
     }
-    
-    if(input$sti){
-      proxy %>% clearMarkers() %>%  addMarkers(data = sti_coord, icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/happy-valentine-s-day-sex-shop/64/condom_sex_safety_contraception-512.png", iconWidth = 35, iconHeight = 35), label = htmlEscape("Stay safe ;)"))
-    }
-    
-    if(!input$festivals && !input$sti) {
-      proxy %>% clearMarkers()
-    }
+   if(input$sti){
+     proxy %>% addMarkers(data = sti_coord, icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/happy-valentine-s-day-sex-shop/64/condom_sex_safety_contraception-512.png", iconWidth = 45, iconHeight = 45), label = htmlEscape("Stay safe ;)"))
+   }
+     
+ 
+     
+     # if(!input$festivals && !input$sti) {
+   
   })
   
   observe({
@@ -216,7 +222,7 @@ server <- function(input, output, session) {
       addLegend(position = "bottomright", title = "Beer Prices",
                 pal = pal, values = ~filteredData()[filteredData()[,1] %in% world[world$name_long %in% filteredData()[,1],]$name_long,][order(filteredData()[filteredData()[,1] %in% world[world$name_long %in% filteredData()[,1],]$name_long,][,1]),3])
       }else {
-      proxy %>% clearShapes()}
+      proxy %>% clearShapes() %>% clearControls()}
   })
   
 
@@ -227,28 +233,25 @@ server <- function(input, output, session) {
   
   observe({
     proxy <- leafletProxy("mymap", data = data) 
+    if(!input$prostitution || !input$weed || !input$uber || !input$sti) {
+      proxy %>% clearShapes() %>% clearControls()}
     if (input$prostitution) {
-     # proxy %>% clearShapes() %>% addPolygons(data = world[world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"),], fillColor = "green", label = htmlEscape("Prostitution is legal here"), stroke = FALSE) %>% 
-      #  addPolygons(data = world[world$name_long %in% c("Albania", "Andorra", "Armenia", "Austria", "Azerbaijan", "Belarus", "Bosnia", "Bulgaria", "Croatia", "Cyprus", "Czechia",  "Estonia", "France", "Georgia", "Greece", "Hungary", "Iceland", "Ireland", "Kazakhstan", "Kosovo", "Latvia", " Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", " Montenegro", "Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Sweden", "Turkey", "Ukraine", "United Kingdom"),], fillColor = "red", label = htmlEscape("Prostitution is illegal here"), stroke = FALSE)
-      proxy %>% clearShapes() %>%  
-        addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"))),], fillColor = "red", label = htmlEscape("Prostitution is legal here"), stroke = FALSE) %>%
+       proxy %>%  
+        addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"))),], fillColor = "red", label = htmlEscape("Prostitution is illegal here"), stroke = FALSE) %>%
         addPolygons(data = world[world$name_long %in% c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "Spain"),], fillColor = "green", label = htmlEscape("Prostitution is legal here"), stroke = FALSE) 
          } 
     if(input$weed) {
-      proxy %>% clearShapes() %>% addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands"))),], fillColor = "red", label = htmlEscape("Weed is legal here"), stroke = FALSE) %>%
+      proxy %>%   addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands"))),], fillColor = "red", label = htmlEscape("Weed is illegal here"), stroke = FALSE) %>%
         addPolygons(data = world[world$name_long %in% c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands"),], fillColor = "green", label = htmlEscape("Weed is legal here"), stroke = FALSE) 
     }
     if(input$uber) {
-      proxy %>% clearShapes() %>% addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"))),], fillColor = "red", label = htmlEscape("Consider taking a cab, cause there is no Uber here"), stroke = FALSE) %>%
+      proxy %>%   addPolygons(data = world[((world$continent %in% c("Europe")) & !(world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"))),], fillColor = "red", label = htmlEscape("Consider taking a cab, cause there is no Uber here"), stroke = FALSE) %>%
         addPolygons(data = world[world$name_long %in% c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom"),], fillColor = "green", label = htmlEscape("There is Uber here!"), stroke = FALSE) 
     }
     if(input$sti){
-      proxy %>% clearShapes() %>% addPolygons(data = world[world$name_long %in% sti_data,], fillColor = "red", stroke = FALSE) 
+      proxy %>%   addPolygons(data = world[world$name_long %in% sti_data,], fillColor = "grey", stroke = FALSE) 
     }
-    if(!input$prostitution && !input$weed && !input$uber && !input$sti) {
-      proxy %>% clearShapes()}
   })
-  
 }
 
 # Run the application 

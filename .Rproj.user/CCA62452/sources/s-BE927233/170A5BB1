@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557847491785.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "170A5BB1",
+    "lastKnownWriteTime" : 0,
+    "last_content_update" : 1557847491785,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "B14D590A",
+        "caption" : "data_festival",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=data_festival&cache_key=B14D590A",
+        "displayedObservations" : 150,
+        "environment" : "",
+        "object" : "data_festival",
+        "preview" : 0,
+        "totalObservations" : 150,
+        "variables" : 6
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

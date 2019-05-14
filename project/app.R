@@ -97,7 +97,7 @@ for (i in 1:n){
   
   festival_locations[i] = paste(gsub("\\,", "", (sub(".*\"addressLocality\": \"*(.*?) *\",\n.*", "\\1", festivals[i]))), gsub("\\,", "", (sub(".*\",\n    \"addressRegion\": \" *(.*?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i]))))
   
-  festival_country[i] = gsub("\\,", "", (sub(".*,\n    \"addressRegion\": \" *(.?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i])))
+  festival_country[i] = gsub("\\,", "", (sub(".*\",\n    \"addressRegion\": \" *(.*?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i])))
   
   festival_dates[i] = gsub("\\,", "", (sub(".*\n \"startDate\": \"*(.*?) *\",\n \"endDate\":.*", "\\1", festivals[i])))
   
@@ -127,22 +127,14 @@ sti_coord = geocode(sti_data, source = "google")
 #create Data Frame
 
 
-f_names <- toString(festival_names)
-f_locations <- toString(data_festival$country)
+f_names <- data_festival$names
+f_locations <- data_festival$country
 
-
-f_countries <- rep(NA, length(f_names))
-for (i in 1:length(f_names)) {
-  f_locations2 = strsplit(f_locations, split = "\n           ", fixed = T)[[i]]
-  f_country = strsplit(f_locations2, split = ", ", fixed = T)[[2]]
-  f_countries[i] = f_country[2]
-}
-rm(f_locations, f_locations2, f_country, f_country2)
 
 f_prostitution <- rep(NA, length(f_names))
 prostitution_legal <- c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "The Netherlands", "Spain")
 for (j in 1:length(f_names)) {
-  if (f_countries[j] %in% prostitution_legal ) {
+  if (f_locations[j] %in% prostitution_legal ) {
     f_prostitution[j] = "Yes"
   }else{
     f_prostitution[j] = "No"
@@ -153,7 +145,7 @@ rm(prostitution_legal)
 f_weed <- rep(NA, length(f_names))
 weed_legal <- c("Croatia", "Sweden", "Portugal", "Turkey", "Macedonia", "Finland", "Norway", "Poland", "Denmark", "Estonia", "Greece", "Switzerland", "Austria", "Italy", "Germany", "Belgium", "Netherlands", "The Netherlands")
 for (k in 1:length(f_names)) {
-  if (f_countries[k] %in% weed_legal ) {
+  if (f_locations[k] %in% weed_legal ) {
     f_weed[k] = "Yes"
   }else{
     f_weed[k] = "No"
@@ -164,7 +156,7 @@ rm(weed_legal)
 f_uber <- rep(NA, length(f_names))
 is_there_uber <- c("Austria", "Belgium", "Croatia", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Lithuania", "Netherlands", "The Netherlands", "Norway", "Poland", "Portugal", "Romania", "Slovakia", "Spain", "Sweden", "Switzerland", "United Kingdom")
 for (l in 1:length(f_names)) {
-  if (f_countries[l] %in% is_there_uber ) {
+  if (f_locations[l] %in% is_there_uber ) {
     f_uber[l] = "Yes"
   }else{
     f_uber[l] = "No"
@@ -175,7 +167,7 @@ rm(is_there_uber)
 f_sti <- rep(NA, length(f_names))
 high_risk <- c("United Kingdom", "Denmark", "Sweden", "Iceland", "Norway")
 for (m in 1:length(f_names)) {
-  if (f_countries[m] %in% high_risk ) {
+  if (f_locations[m] %in% high_risk ) {
     f_sti[m] = "High risk! (>10%)"
   }else{
     f_sti[m] = "All good (<10%)"
@@ -187,13 +179,13 @@ f_beer <- rep(5.67, length(f_names))
 prices_beer <- data_beer
 for (n in 1:length(f_names)) {
   for(z in 1:177){
-    if (f_countries[n] == prices_beer[,1][z]) {
+    if (f_locations[n] == prices_beer[,1][z]) {
       f_beer[n] = prices_beer[,3][z]
     }
   }
 } 
 
-compiled <- data.frame("Country" = f_countries, "Festival" = f_names, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
+compiled <- data.frame("Country" = f_locations, "Festival" = f_names, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
 
 
 # Define UI for application that draws a histogram

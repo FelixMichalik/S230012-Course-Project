@@ -1,0 +1,53 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
+
+
+
+#Webscrape music festival data
+music_festivals = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/")
+
+
+festivals <- music_festivals %>% 
+  html_nodes(".mobile-one-whole") %>%
+  html_text()
+
+n = length(festivals)
+festival_names = rep("", n)
+festival_locations = rep("", n)
+festival_country = rep("", n)
+festival_dates = rep("", n)
+festival_end_dates = rep("", n)
+festival_cities_coord = rep(NA, n)
+
+for (i in 1:n){ 
+  festival_names[i] = gsub("\\,", "", (sub(".*\"\n  }\n},\n  \"name\": \"*(.*?) *\",\n  \"description\":.*", "\\1", festivals[i])))
+  
+  festival_locations[i] = paste(gsub("\\,", "", (sub(".*\"addressLocality\": \"*(.*?) *\",\n.*", "\\1", festivals[i]))), gsub("\\,", "", (sub(".*\",\n    \"addressRegion\": \" *(.*?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i]))))
+  
+ festival_country[i] = gsub("\\,", "", (sub(".*\",\n    \"addressRegion\": \" *(.*?) *\"\n  }\n},\n  \"name\":.*", "\\1", festivals[i])))
+  
+  festival_dates[i] = gsub("\\,", "", (sub(".*\n \"startDate\": \"*(.*?) *\",\n \"endDate\":.*", "\\1", festivals[i])))
+  
+  festival_end_dates[i] = gsub("\\,", "", (sub(".*\"endDate\": \"*(.*?) *\"\n.*", "\\1", festivals[i])))
+}
+
+data_festival = geocode(festival_locations, source = "google")
+
+data_festival$names =  festival_names
+data_festival$locations = festival_locations
+data_festival$country = festival_country
+data_festival$dates = as.Date(festival_dates, "%B %d %Y")
+
+is.data.frame(data_festival)
+
+data_festival$country
+```
+

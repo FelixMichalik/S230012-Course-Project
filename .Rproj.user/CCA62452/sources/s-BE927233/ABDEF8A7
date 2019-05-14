@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557846175681.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "ABDEF8A7",
+    "lastKnownWriteTime" : 8389754657483784198,
+    "last_content_update" : 1557846175681,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "C3F7A429",
+        "caption" : "data_beer",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=data_beer&cache_key=C3F7A429",
+        "displayedObservations" : "177",
+        "environment" : "",
+        "object" : "data_beer",
+        "preview" : "0",
+        "totalObservations" : "177",
+        "variables" : "3"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

@@ -132,6 +132,10 @@ sti_coord = geocode(sti_data, source = "google")
 f_names <- data_festival$names
 f_locations <- data_festival$country
 
+f_dates <- rep(NA, length(f_names))
+for (u in 1:length(f_names)) {
+  f_dates[u] = toString(data_festival$dates[u])
+}
 
 f_prostitution <- rep(NA, length(f_names))
 prostitution_legal <- c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "The Netherlands", "Spain")
@@ -187,8 +191,8 @@ for (n in 1:length(f_names)) {
   }
 } 
 
-compiled <- data.frame("Country" = f_locations, "Festival" = f_names, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
-
+compiled2 <- data.frame(Country = f_locations, Festival = f_names, "When" = f_dates, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
+compiled <- compiled2[order(compiled2$Country),]
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(skin = "blue",

@@ -41,44 +41,46 @@ for (child in music_festivals3children) {
 }
 
 music_festivals4 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/4/")
-music_festivals4children <- xml_children(music_festivals3)
+music_festivals4children <- xml_children(music_festivals4)
 for (child in music_festivals4children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals5 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/5/")
-music_festivals5children <- xml_children(music_festivals3)
+music_festivals5children <- xml_children(music_festivals5)
 for (child in music_festivals5children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals6 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/6/")
-music_festivals6children <- xml_children(music_festivals3)
+music_festivals6children <- xml_children(music_festivals6)
 for (child in music_festivals6children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals7 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/7/")
-music_festivals7children <- xml_children(music_festivals3)
+music_festivals7children <- xml_children(music_festivals7)
 for (child in music_festivals7children) {
   xml_add_child(music_festivals, child)
 }
 
 music_festivals8 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/8/")
-music_festivals8children <- xml_children(music_festivals3)
+music_festivals8children <- xml_children(music_festivals8)
 for (child in music_festivals8children) {
   xml_add_child(music_festivals, child)
 }
 music_festivals9 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/9/")
-music_festivals9children <- xml_children(music_festivals3)
+music_festivals9children <- xml_children(music_festivals9)
 for (child in music_festivals9children) {
   xml_add_child(music_festivals, child)
 }
 music_festivals10 = read_html("https://www.musicfestivalwizard.com/festival-guide/europe-festivals/page/10/")
-music_festivals10children <- xml_children(music_festivals3)
+music_festivals10children <- xml_children(music_festivals10)
 for (child in music_festivals10children) {
   xml_add_child(music_festivals, child)
 }
+
+
 
 festivals <- music_festivals %>% 
   html_nodes(".mobile-one-whole") %>%
@@ -130,6 +132,10 @@ sti_coord = geocode(sti_data, source = "google")
 f_names <- data_festival$names
 f_locations <- data_festival$country
 
+f_dates <- rep(NA, length(f_names))
+for (u in 1:length(f_names)) {
+  f_dates[u] = toString(data_festival$dates[u])
+}
 
 f_prostitution <- rep(NA, length(f_names))
 prostitution_legal <- c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "The Netherlands", "Spain")
@@ -179,14 +185,14 @@ f_beer <- rep(5.67, length(f_names))
 prices_beer <- data_beer
 for (n in 1:length(f_names)) {
   for(z in 1:177){
-    if (f_locations[n] == prices_beer[,1][z]) {
-      f_beer[n] = prices_beer[,3][z]
+    if (f_locations[n] == prices_beer[z,1]) {
+      f_beer[n] = prices_beer[z,3]
     }
   }
 } 
 
-compiled <- data.frame("Country" = f_locations, "Festival" = f_names, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
-
+compiled2 <- data.frame(Country = f_locations, Festival = f_names, "When" = f_dates, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
+compiled <- compiled2[order(compiled2$Country),]
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(skin = "blue",
@@ -279,6 +285,11 @@ server <- function(input, output, session) {
    
     a[,]
  })
+  
+  table_data = reactive({
+    
+    compiled$Country == input$inCountry
+  })
  # filteredDatacol = reactive({
   #  a = filter(data_beer, price <= input$beer)
    # a
@@ -300,7 +311,7 @@ server <- function(input, output, session) {
   })
   #create the Table
   output$countryData <- renderTable({
-    stateFilter <-subset(compiled, compiled$Country == input$inCountry)
+    stateFilter <-subset(compiled, table_data())
   })
   
   #next we use the observe function to make the checkboxes dynamic. If you leave this part out you will see that the checkboxes, when clicked on the first time, display our filters...But if you then uncheck them they stay on. So we need to tell the server to update the map when the checkboxes are unchecked.

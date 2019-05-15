@@ -12,15 +12,15 @@
     "path" : null,
     "project_path" : null,
     "properties" : {
-        "cacheKey" : "B14D590A",
+        "cacheKey" : "1F08B891",
         "caption" : "data_festival",
-        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=data_festival&cache_key=B14D590A",
-        "displayedObservations" : 150,
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=data_festival&cache_key=1F08B891",
+        "displayedObservations" : "15",
         "environment" : "",
         "object" : "data_festival",
-        "preview" : 0,
-        "totalObservations" : 150,
-        "variables" : 6
+        "preview" : "0",
+        "totalObservations" : "15",
+        "variables" : "6"
     },
     "relative_order" : 5,
     "source_on_save" : false,

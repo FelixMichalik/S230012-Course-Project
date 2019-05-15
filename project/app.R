@@ -7,6 +7,7 @@
 #    http://shiny.rstudio.com/
 #jnjk
 
+#libraries used
 library(shiny)
 library(leaflet)
 library(dplyr)
@@ -129,7 +130,7 @@ sti_coord = geocode(sti_data, source = "google")
 
 
 #create Data Frame
-
+#including categories listed 
 
 f_names <- data_festival$names
 f_locations <- data_festival$country

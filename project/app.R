@@ -224,7 +224,7 @@ ui <- dashboardPage(skin = "blue",
                                         style = "padding: 10px;"),
                                       tags$hr(),
                                       tags$div(tags$blockquote("Already know where you will party next?")),
-                                      tags$div(tags$b("Select your destinatin and get summary of all the relevant information underneath the map"),style = "padding-left: 10px;"),
+                                      tags$div(tags$b("Select your destination and get a summary of all the relevant information underneath the map"),style = "padding-left: 10px;"),
                                       selectInput("inCountry", "Select a country", choices = compiled$Country),
                                       tags$br(),
                                       

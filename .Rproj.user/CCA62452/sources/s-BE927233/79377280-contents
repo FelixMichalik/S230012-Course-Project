@@ -22,8 +22,9 @@ library(rvest)
 library(htmltools)
 library(spData)
 library(tidyverse)
-register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
 
+
+register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
 
 
 #Webscrape music festival data
@@ -114,12 +115,13 @@ data_festival$country = festival_country
 data_festival$dates = as.Date(festival_dates, "%B %d %Y")
 
 is.data.frame(data_festival)
+
 #Get data on airports
-data1 = read.csv("largeairports.csv")
+data1 = read.csv("largeairports.csv") #when our app goes online we would upload this dataset
 
 #Get data on beer prices
-data_beer = read.csv("beerprices.csv")
-pal = colorNumeric(palette = "RdYlBu", domain = c(max(data_beer[,3]), min(data_beer[,3])))
+data_beer = read.csv("beerprices.csv") #when our app goes online we would upload this dataset
+pal = colorNumeric(palette = "RdYlBu", domain = c(max(data_beer[,3]), min(data_beer[,3])))  #set colors for beer prices
 
 #Get data on STI
 sti_data = c("United Kingdom", "Denmark", "Sweden", "Iceland", "Norway")
@@ -140,7 +142,7 @@ for (u in 1:length(f_names)) {
 f_prostitution <- rep(NA, length(f_names))
 prostitution_legal <- c("Denmark", "Finland", "Belgium", "Germany", "Greece", "Italy", "Switzerland", "Netherlands", "The Netherlands", "Spain")
 for (j in 1:length(f_names)) {
-  if (f_locations[j] %in% prostitution_legal ) {
+  if (f_locations[j] %in% prostitution_legal) {
     f_prostitution[j] = "Yes"
   }else{
     f_prostitution[j] = "No"
@@ -203,67 +205,54 @@ ui <- dashboardPage(skin = "blue",
                     dashboardSidebar(width = 300,
                                      tags$head(
                                        tags$style(HTML(".sidebar {
-                      height: 90vh; overflow-y: auto; 
+                      height: 90vh; width: 300px; overflow-y: auto; position: fixed;
                     }"
-                                       ) # close HTML       
-                                       )            # close tags$style
+                                       )      
+                                       )    
                                      ),
+                                    
                                      #sidebarMenu(
-                                     
                                      tags$div(
                                       tags$blockquote("Use this app to see where to party next!"),
-                                       tags$b("Display:"),
-                                       style = "padding-left: 10px;"),
-                                       checkboxInput("airports", "Airports", FALSE),
-                                       checkboxInput("sti", "Countries with highest propensity (at least 10% risk) of STI infection", FALSE),
-                                       
-                                       tags$div(tags$b("What's going on?"),style = "padding-left: 10px;"),
-                                       
-                                       checkboxInput("festivals", "Festivals", FALSE), 
-                                     tags$div(
-                                       tags$p(dateInput('minDate',
-                                                      label = 'From:',
-                                                      value = min(data_festival$dates)
-                                     ),
-                                       dateInput('maxDate',
+                                      tags$div(
+                                        tags$h4("WELCOME PARTY TRAVELERS, TO YOUR ULTIMATE GUIDE IN NAVIGATING THE WORLD OF SEX, DRUGS, AND ROCK AND ROLL..ALL OVER EUROPE!"),
+                                        tags$p("THE PARTY INDEX WAS CREATED TO SATISFY THAT CURIOSITY MANY OF US HAVE, BUT ARE TOO SHY TO ASK, WHEN TRYING TO DECIDE WHERE TO GO AND WHAT TO DO FOR THE NEXT BIG TRIP."),
+                                        tags$p("ALL OF THE INFORMATION WE PROVIDE IS OPEN SOURCED AND PUBLICLY DISCLOSED ONLINE. FOR A FULL OVERVIEW AND SOURCES SEE OUR", tags$a(href="https://github.com/FelixMichalik/project/blob/master/README.md", "README FILE")),
+                                        tags$p("THROUGH OUR APP, WE GIVE YOU THE POWER TO MAKE THE SAFEST AND MOST RESPONSIBLE DECISIONS WHEN IT COMES TO HOW TO SPEND YOUR TIME IN ANOTHER COUNTRY."),
+                                        tags$p("BE SURE TO CHECK OUT ALL OF THE CATEGORIES DISPLAYED, HOVER YOUR MOUSE OVER OUR INTERACTIVE MAP."),
+                                        tags$p("PARTY ON!"),
+                                        style = "padding: 10px;"),
+                                      tags$hr(),
+                                      tags$div(tags$blockquote("Already know where you will party next?")),
+                                      tags$div(tags$b("Select your destination and get a summary of all the relevant information underneath the map"),style = "padding-left: 10px;"),
+                                      selectInput("inCountry", "Select a country", choices = compiled$Country),
+                                      tags$br(),
+                                      
+                                      tags$div(tags$blockquote("If not, why not explore our map?")),
+                                      tags$div(tags$b("What's going on?"),style = "padding-left: 10px;"),
+                                      checkboxInput("festivals", "Festivals", FALSE), 
+                                      tags$div(
+                                        tags$p(dateInput('minDate',
+                                                         label = 'From:',
+                                                         value = min(data_festival$dates)
+                                        ),
+                                        dateInput('maxDate',
                                                   label = 'To:',
-                                                     value = max(data_festival$dates)
-                                       )), style = "padding-left: 30px;"),
-                                       #tags$p(checkboxInput("country", "Switzerland", FALSE)),
-                                     
-                                     tags$div(tags$b("Compare countries by"), style = "padding-left: 10px;"),
-                                     tabsetPanel(
-                                       tabPanel("Other", checkboxInput("uber", "Is Uber available?", FALSE), checkboxInput("prostitution", "Is prostitution legal?", FALSE), checkboxInput("weed", "Is weed legal?", FALSE)),
-                                       tabPanel("Beer Prices",checkboxInput("checkBeer", "Display beer prices", FALSE), sliderInput(inputId = "beer", "Select price range", min(data_beer$price)+0.9, max(data_beer$price), value = max(data_beer$price)))
-                                     ),
-                                     #tags$hr(),
-                                     
-                                     #tags$p(checkboxInput("prostitution", "Prostitution", FALSE)),
-                                     #tags$p(checkboxInput("weed", "Weed", FALSE)),
-                                     
-                                     #selectInput("abc", "ABC", c("a", "b","c"), selected = NULL),
-                                     
-                                     
-                                     #tags$p("Compare beer prices:"),
-                                     #tags$p(checkboxInput("checkBeer", "Display beer index", FALSE)),
-                                    
-                                       #textInput(inputId = "country", label = "Country", value = "Switzerland", width = NULL,
-                                        #         placeholder = NULL),
-                                     selectInput("inCountry", "Select a country", choices = compiled$Country),
-                                     
-                                     tags$div(
-                                       tags$h4("Here we can explain what we did:"),
-                                       tags$p("For a full overview over our data please see our", tags$a(href="https://github.com/FelixMichalik/project/blob/master/README.md", "README file"),"."),
-                                       tags$p("Click on SELECT NONE, then scroll down to Location History and click on the slider to select it."),
-                                       tags$p("Scroll to the bottom and click NEXT, then CREATE ARCHIVE, and finally DOWNLOAD when it is ready. You will need to verify by logging into your Google account."),
-                                       tags$p("This will download a ZIP file to your downloads directory. Extract this ZIP file which will create a directory called Takeout"),
-                                       tags$p("Upload the JSON file found in Takeout/Location History using the selector below..."),
-                                     style = "padding: 10px;")
-                                   #  ) 
-                               
-                    ),
+                                                  value = max(data_festival$dates)
+                                        )), style = "padding-left: 30px;"),
+                                      tags$br(),
+                                      tags$b("Not sure how to get there?"), style = "padding-left: 10px;"),
+                                     checkboxInput("airports", "Show Airports", FALSE),
+                                     tags$br(),
+                                      tags$div(tags$b("Compare countries by:"),tags$br(), style = "padding-left: 10px;"),
+                                      tabsetPanel(
+                                        tabPanel("Other", checkboxInput("uber", "Is Uber available?", FALSE), checkboxInput("prostitution", "Is prostitution legal?", FALSE), checkboxInput("weed", "Is weed legal?", FALSE), checkboxInput("sti", "Countries with highest propensity (at least 10% risk) of STI infection", FALSE)),
+                                        tabPanel("Beer Prices",checkboxInput("checkBeer", "Display beer prices", FALSE), sliderInput(inputId = "beer", "Select price range", min(data_beer$price)+0.9, max(data_beer$price), value = max(data_beer$price)))
+                                      )
+                     ),
                     
-                    # Main panel for displaying outputs ----
+                    
+                    # Main panel for displaying outputs 
                     dashboardBody(
                       
                       tags$head(tags$style("#mymap{height:90vh !important;}")),
@@ -276,9 +265,10 @@ ui <- dashboardPage(skin = "blue",
                     )
 )
 
-# Define server logic required to draw a histogram
+# Define server
 server <- function(input, output, session) {
   
+  # make data imputs dynamic
   filteredData = reactive({
    
    a = filter(data_beer, price <= input$beer)
@@ -290,10 +280,7 @@ server <- function(input, output, session) {
     
     compiled$Country == input$inCountry
   })
- # filteredDatacol = reactive({
-  #  a = filter(data_beer, price <= input$beer)
-   # a
-#  })
+ 
   
   #create the map
   output$mymap <- renderLeaflet({
@@ -302,19 +289,19 @@ server <- function(input, output, session) {
       addProviderTiles(providers$CartoDB.DarkMatter, group = "Dark Maptile") %>%
       addProviderTiles(providers$Esri.WorldImagery, group = "Satellite Maptile") %>%
       setView(24, 27, zoom = 2) %>% 
-      #addPolygons(fill = TRUE)%>% 
       addLayersControl(
         baseGroups = c("Default Maptile", "Dark Maptile", "Satellite Maptile"),
         options = layersControlOptions(collapsed = FALSE)
       )
     
   })
+  
   #create the Table
   output$countryData <- renderTable({
     stateFilter <-subset(compiled, table_data())
   })
   
-  #next we use the observe function to make the checkboxes dynamic. If you leave this part out you will see that the checkboxes, when clicked on the first time, display our filters...But if you then uncheck them they stay on. So we need to tell the server to update the map when the checkboxes are unchecked.
+  #use the observe function to make the inputs dynamic. 
   
   observe({
     proxy <- leafletProxy("mymap", data = data1)
@@ -334,7 +321,6 @@ server <- function(input, output, session) {
      proxy %>% clearMarkers()
    }
     if (input$festivals){
-      #fdata = data_festival[data_festival$dates %in% input$dateRange),]
       proxy %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
                                                                                                                                                                    data_festival$names,
                                                                                                                                                                    gsub(" ", ", ", data_festival$locations, fixed = TRUE),
@@ -343,12 +329,7 @@ server <- function(input, output, session) {
    if(input$sti){
      proxy %>% addMarkers(data = sti_coord, icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/happy-valentine-s-day-sex-shop/64/condom_sex_safety_contraception-512.png", iconWidth = 45, iconHeight = 45), label = htmlEscape("Stay safe ;)"))
    }
-     
- 
-     
-     # if(!input$festivals && !input$sti) {
-   
-  })
+      })
   
   observe({
     proxy <- leafletProxy("mymap", data = filteredData()) 
@@ -362,11 +343,6 @@ server <- function(input, output, session) {
   })
   
 
-  #    for(i in 1:nrow(data_beer)){
-   #     if(input$beer >= data_beer[i,3]){
- #   proxy %>% addPolygons(data = world[world$name_long == data_beer[i,1], ], fill = TRUE)
-#  }}})
-  
   observe({
     proxy <- leafletProxy("mymap", data = data) 
     if(!input$prostitution || !input$weed || !input$uber || !input$sti) {

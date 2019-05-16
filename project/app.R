@@ -211,7 +211,7 @@ for (n in 1:length(f_names)) {
   }
 } 
 
-compiled2 <- data.frame(Country = f_locations, Festival = f_names, "When" = f_dates, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI infection" = f_sti)
+compiled2 <- data.frame(Country = f_locations, Festival = f_names, "When" = f_dates, "Average price of beer" = f_beer, "Is weed legal?" = f_weed, "Is prostitution legal?" = f_prostitution, "Do they have Uber?" = f_uber, "Propensity of STI" = f_sti)
 compiled <- compiled2[order(compiled2$Country),]
 
 # Define UI for application that draws a histogram

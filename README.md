@@ -1,5 +1,6 @@
 # Party Index Map
-##Desrcription
+(can be found here: https://github.com/FelixMichalik/project/blob/master/project/app.R)
+## Description
 
 "WELCOME PARTY TRAVELERS, TO YOUR ULTIMATE GUIDE IN NAVIGATING THE WORLD OF SEX, DRUGS, AND ROCK AND ROLL..ALL OVER EUROPE!  
 

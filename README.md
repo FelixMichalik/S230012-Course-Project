@@ -12,7 +12,7 @@ THROUGH OUR APP, WE GIVE YOU THE POWER TO MAKE THE SAFEST AND MOST RESPONSIBLE D
 
 BE SURE TO CHECK OUT ALL OF THE CATEGORIES DISPLAYED, HOVER YOUR MOUSE OVER OUR INTERACTIVE MAP, AND VISIT THE ABOUT SECTION AT THE BOTTOM."
 
-##Overview of Categories
+## Overview of Categories
 
 | Sources                                                                                           | CATEGORIES                    | Description                                                                                                                                                                                                                                                                                                                                                                                           |
 |---------------------------------------------------------------------------------------------------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

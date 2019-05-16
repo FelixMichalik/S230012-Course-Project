@@ -7,6 +7,23 @@
 #    http://shiny.rstudio.com/
 #jnjk
 
+#Needed packages (ATTENTION:This part of the code would only need to be run once, we leave it here so a new user can run easily the code)
+install.packages("shiny")
+install.packages("leaflet")
+install.packages("dplyr")
+install.packages("leaflet.extras")
+install.packages("shinydashboard")
+install.packages("tmap")
+install.packages("sf")   
+install.packages("raster")
+install.packages("spData")
+install.packages("ggmap")
+install.packages("xml2")
+install.packages("rvest")
+install.packages("htmltools")
+install.packages("spData")
+install.packages("tidyverse")
+
 #libraries used
 library(shiny)
 library(leaflet)

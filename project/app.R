@@ -322,11 +322,11 @@ server <- function(input, output, session) {
      proxy %>% clearMarkers()
    }
     if (input$festivals){
-      proxy %>%  addMarkers(data = data_festival[data_festival$dates %in% as.Date(input$minDate, "yyyy-mm-dd"):as.Date(input$maxDate, "yyyy-mm-dd"),], popup=paste(sep = "<br/>",
-                                                                                                                                                                   data_festival$names,
-                                                                                                                                                                   gsub(" ", ", ", data_festival$locations, fixed = TRUE),
-                                                                                                                                                                   data_festival$dates), icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
-    }
+    proxy %>%  addMarkers(data = data_festival[as.Date(data_festival$dates, "%Y-%m-%d") %in% seq(from = as.Date(input$minDate, "%Y-%m-%d"), to = as.Date(input$maxDate, "%Y-%m-%d"), by = "day"),], popup=paste(sep = "<br/>",
+                                                                                                                                                                                                                data_festival[as.Date(data_festival$dates, "%Y-%m-%d") %in% seq(from = as.Date(input$minDate, "%Y-%m-%d"), to = as.Date(input$maxDate, "%Y-%m-%d"), by = "day"),]$names,
+                                                                                                                                                                 gsub(" ", ", ", data_festival[as.Date(data_festival$dates, "%Y-%m-%d") %in% seq(from = as.Date(input$minDate, "%Y-%m-%d"), to = as.Date(input$maxDate, "%Y-%m-%d"), by = "day"),]$locations, fixed = TRUE),
+                                                                                                                                                                 data_festival[as.Date(data_festival$dates, "%Y-%m-%d") %in% seq(from = as.Date(input$minDate, "%Y-%m-%d"), to = as.Date(input$maxDate, "%Y-%m-%d"), by = "day"),]$dates), icon = makeIcon(iconUrl = "https://cdn2.iconfinder.com/data/icons/new-year-s-hand-drawn-basic/64/dancer_3-512.png", iconWidth = 35, iconHeight = 35))
+  }
    if(input$sti){
      proxy %>% addMarkers(data = sti_coord, icon = makeIcon(iconUrl = "https://cdn4.iconfinder.com/data/icons/happy-valentine-s-day-sex-shop/64/condom_sex_safety_contraception-512.png", iconWidth = 45, iconHeight = 45), label = htmlEscape("Stay safe ;)"))
    }

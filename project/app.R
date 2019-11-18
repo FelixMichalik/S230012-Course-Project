@@ -42,7 +42,7 @@ library(spData)
 library(tidyverse)
 
 
-register_google(key = "AIzaSyA4D9aPj-qv-E2uJOZftIks39gfKV8hT4g")
+register_google(key = [instert key])
 
 
 #Webscrape music festival data
